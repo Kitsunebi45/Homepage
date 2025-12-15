@@ -1,2 +1,2 @@
 placeholder
-Emojis are stocks, flow, etc representative of the archetype of what is going on.
+Emojis are stocks, flow, etc representative of the archetype of what is going on in the maps.
