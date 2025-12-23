@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Fox's Tarot</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 3em;
+      color: #ff69b4;
+      text-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: #87ceeb;
+      font-style: italic;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+      border: none;
+      color: white;
+      padding: 12px 30px;
+      font-size: 1em;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 105, 180, 0.5);
+    }
+
+    .deck-selector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(42, 42, 62, 0.5);
+      border-radius: 15px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .deck-btn {
+      background: linear-gradient(135deg, #87ceeb 0%, #4682b4 100%);
+      padding: 10px 20px;
+      font-size: 0.9em;
+    }
+
+    .deck-btn.active {
+      background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+    }
+
+    .spread-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 40px 0;
+      min-height: 300px;
+    }
+
+    .spread-label {
+      width: 100%;
+      text-align: center;
+      color: #87ceeb;
+      font-size: 1.2em;
+      font-style: italic;
+      margin-top: 10px;
+    }
+
+    .spread-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .card-position {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .position-label {
+      color: #ff69b4;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .card {
+      width: 180px;
+      height: 300px;
+      background: linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%);
+      border: 2px solid #ff69b4;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 12px 35px rgba(255, 105, 180, 0.4);
+      border-color: #87ceeb;
+    }
+
+    .card.flipped {
+      background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+    }
+
+    .card-back {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-front {
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    .card.flipped .card-back {
+      display: none;
+    }
+
+    .card.flipped .card-front {
+      display: flex;
+    }
+
+    .card.reversed {
+      transform: rotate(180deg);
+    }
+
+    .card.reversed:hover {
+      transform: rotate(180deg) translateY(-10px) scale(1.05);
+    }
+
+    .card.reversed .card-front {
+      transform: rotate(180deg);
+    }
+
+    .reversed-indicator {
+      color: #ff69b4;
+      font-size: 0.8em;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    .card-number {
+      font-size: 1.2em;
+      color: #87ceeb;
+      font-weight: bold;
+    }
+
+    .card-title {
+      font-size: 1.5em;
+      color: white;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+
+    .card-suit {
+      font-size: 0.9em;
+      color: #ff69b4;
+      font-style: italic;
+    }
+
+    .card-icon {
+      font-size: 4em;
+      margin: 20px 0;
+    }
+
+    .card-meaning {
+      font-size: 0.85em;
+      color: #fff;
+      line-height: 1.4;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%);
+      border: 3px solid #ff69b4;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
+    }
+
+    .modal-content h2 {
+      color: #ff69b4;
+      margin-bottom: 10px;
+      font-size: 2em;
+    }
+
+    .modal-content .suit {
+      color: #87ceeb;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+
+    .modal-content .meaning {
+      color: #fff;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .close-modal {
+      background: linear-gradient(135deg, #87ceeb 0%, #4682b4 100%);
+      margin-top: 20px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1a1a2e;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #ff69b4;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🦊 The Fox's Tarot ⛩️</h1>
+    <p>Based on Inari Okami and the Kitsune</p>
+  </div>
+
+  <div class="deck-selector">
+    <label style="color: #ff69b4; display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+      <input type="checkbox" class="deck-check" data-deck="major" checked style="width: 20px; height: 20px; cursor: pointer;">
+      Major Arcana
+    </label>
+    <label style="color: #ff69b4; display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+      <input type="checkbox" class="deck-check" data-deck="kitsune" style="width: 20px; height: 20px; cursor: pointer;">
+      Kitsune (Fire/Wands)
+    </label>
+    <label style="color: #ff69b4; display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+      <input type="checkbox" class="deck-check" data-deck="kame" style="width: 20px; height: 20px; cursor: pointer;">
+      Kame (Water/Cups)
+    </label>
+    <label style="color: #ff69b4; display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+      <input type="checkbox" class="deck-check" data-deck="tengu" style="width: 20px; height: 20px; cursor: pointer;">
+      Tengu (Air/Swords)
+    </label>
+    <label style="color: #ff69b4; display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+      <input type="checkbox" class="deck-check" data-deck="tanuki" style="width: 20px; height: 20px; cursor: pointer;">
+      Tanuki (Earth/Pentacles)
+    </label>
+  </div>
+
+  <div class="controls">
+    <button id="drawOne">1 Card: Advice</button>
+    <button id="drawThree">3 Cards: Root, Present, Guidance</button>
+    <button id="drawNine">9 Cards: The Path</button>
+    <button id="clearSpread">Clear Spread</button>
+    <label style="color: #87ceeb; margin-left: 20px; display: flex; align-items: center; gap: 10px;">
+      <input type="checkbox" id="allowReversed" checked style="width: 20px; height: 20px; cursor: pointer;">
+      Allow Reversed Cards
+    </label>
+  </div>
+
+  <div class="spread-container" id="spread"></div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle"></h2>
+      <p class="suit" id="modalSuit"></p>
+      <div class="meaning" id="modalMeaning"></div>
+      <button class="close-modal" id="closeModal">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const majorArcana = [
+      { num: 0, name: "The Kit", meaning: "Innocent wisdom, the beginning of the journey. One tail—the young fox who is already wise but doesn't know it yet. Playful curiosity meets ancient knowing.", reversed: "Naivety without wisdom. Refusing to begin. Being stuck in false innocence or immaturity. Fear of the journey.", icon: "🦊" },
+      { num: 1, name: "Flow", meaning: "Intent meeting action. The river that shapes reality. In chaos magic, in Shinto, in shamanic practice—you don't force, you flow. Natural alignment with power.", reversed: "Resistance. Fighting the current. Forcing instead of flowing. Disconnection from natural rhythm and intent.", icon: "🌊" },
+      { num: 2, name: "Inari", meaning: "Divine mystery, guardian of thresholds, keeper of secrets and abundance. Both masculine and feminine, gentle and fierce. The one who watches over your journey.", reversed: "Disconnection from the divine. Ignoring guidance. Abundance blocked. The guardian's presence unfelt or rejected.", icon: "⛩️" },
+      { num: 3, name: "The Shrine Gate", meaning: "Threshold between worlds. The torii you cross after meeting the divine. Sacred passage from mundane to mystical. Commitment to the path.", reversed: "Refusing to cross. Fear of commitment. Standing at the threshold but not entering. Staying in the mundane by choice.", icon: "⛩️" },
+      { num: 4, name: "The Eye", meaning: "Perspective. Stepping back to see the bigger picture. Shamanic sight. The fox's keen vision. Not lost in details but seeing the whole pattern.", reversed: "Too close to see clearly. Lost in details. Tunnel vision. Refusing to step back and gain perspective.", icon: "👁️" },
+      { num: 5, name: "The Story", meaning: "Tradition, lineage, the tales that teach. In shamanic practice, stories carry wisdom. The myths that shape us. What the elders tell.", reversed: "Rigid adherence to old stories. Being trapped by tradition. Refusing to question the narrative. Dogma over wisdom.", icon: "📖" },
+      { num: 6, name: "The Cage", meaning: "Self-imposed limitations. The prison we build from beliefs, fears, trauma. The bars are stories we tell ourselves. Isolation we create.", reversed: "Breaking free from the cage. Recognizing self-imposed limits. Beginning to dismantle the prison. Liberation starting.", icon: "🔒" },
+      { num: 7, name: "The Web", meaning: "Seeing the threads for the first time. The cage transforms—those aren't just bars, they're connections. Everything links. The pull, the intuition beginning.", reversed: "Tangled in the web. Overwhelmed by connections. Can't see the pattern. Trapped by too many threads.", icon: "🕸️" },
+      { num: 8, name: "Community", meaning: "Not individual strength but collective power. Pack mentality. The threads lead to others. Strength through connection and belonging.", reversed: "Isolation from community. Rejecting help. Lone wolf syndrome. Collective toxicity or codependency.", icon: "👥" },
+      { num: 9, name: "The Rice Harvest", meaning: "Abundance made manifest. Inari's blessing tangible. First fruits of the journey. Prosperity, nourishment, gratitude for what grows.", reversed: "Scarcity mindset. Blocked abundance. Ungrateful for blessings. Harvest lost or withheld.", icon: "🌾" },
+      { num: 10, name: "Unity", meaning: "Sacred union, integration of dualities. Zenko and Yako. Light and shadow. Self and other. Not just romantic love but the bringing together of all parts.", reversed: "Division. Dualities at war. Self-rejection. Unable to integrate opposites. Fractured self.", icon: "☯️" },
+      { num: 11, name: "Ikigai", meaning: "Self-acceptance. Your reason for being. Moving forward through alignment with purpose, not force. Where passion, mission, vocation, and profession meet.", reversed: "Lost purpose. Self-rejection. Moving without direction. The four elements of ikigai misaligned or missing.", icon: "🎯" },
+      { num: 12, name: "The Hanged One", meaning: "Sacrifice brings new perspective. Suspension between worlds. Seeing from a different angle. What you release to gain wisdom.", reversed: "Resisting necessary sacrifice. Refusing to see differently. Stuck in old perspective. Martyrdom without meaning.", icon: "🙃" },
+      { num: 13, name: "The Black Mirror", meaning: "True seeing. Shadow integration. Looking at yourself—all of it—and not turning away. Death of false self, birth of truth.", reversed: "Refusing to look. Denying shadow. Clinging to false self. Fear of what the mirror shows.", icon: "🪞" },
+      { num: 14, name: "The Loom", meaning: "Fate, weaving, laughing at the threads. The wild Yako showing you the web you've woven. Your choices, your patterns. Cosmic humor.", reversed: "Victim mentality. Believing you have no agency. Can't see the patterns you've woven. Missing the cosmic joke.", icon: "🕸️" },
+      { num: 15, name: "Kitsunebi", meaning: "Foxfire. Bound by your own power. The seductive danger of your own flames. Mesmerized by your magic. Beautiful bondage of illusion.", reversed: "Breaking free from self-created illusions. Seeing through your own seduction. Power no longer binding you.", icon: "🔥" },
+      { num: 16, name: "The Unmasking", meaning: "The false self shatters. The mask you didn't know you wore cracks and falls. True face emerging. Terrifying liberation. More tails visible now.", reversed: "Clinging to the mask. Fear of true self. Resisting the shattering. Choosing comfortable lies over hard truths.", icon: "🎭" },
+      { num: 17, name: "The Signal", meaning: "Hope after unmasking. The transmission from divine. You can finally RECEIVE. Guidance emerging. The pull, the knowing, the connection restored.", reversed: "Static. Can't hear the signal. Disconnected from guidance. Hope fading. Receiver broken.", icon: "📡" },
+      { num: 18, name: "The Blood Moon", meaning: "Illusion and intuition. The liminal space. Transformation through blood. Wild magic. The fog, the adjustment, the in-between. Red moon of change.", reversed: "Lost in illusion. Intuition silenced. Stuck in the liminal. Transformation resisted. The fog won't clear.", icon: "🌕" },
+      { num: 19, name: "The Source", meaning: "Clarity, vitality, origin of all. The wellspring. Soul loaded into Signal like a cannon. Reconnecting to yourself, to the sun that powers everything.", reversed: "Disconnected from source. Vitality drained. Can't find the origin. Soul dimmed or unreachable.", icon: "☀️" },
+      { num: 20, name: "Kami", meaning: "Divine spirits in all things. Sacred presence everywhere. Recognizing the animating force in everything. The sacred made visible.", reversed: "Blind to the sacred. Spirits ignored. The divine dismissed as mundane. Everything feels empty of meaning.", icon: "✨" },
+      { num: 21, name: "Musubi", meaning: "Creative life force. The binding energy that connects and creates. Becoming itself. The force that gives birth, that grows, that links all.", reversed: "Creative blocks. Life force stagnant. Unable to connect or create. Becoming frozen. Stagnation.", icon: "🌸" },
+      { num: 22, name: "The Sacred Mirror", meaning: "Seeing clearly in integration. Not the black mirror of shadow work but the polished mirror of clarity. Truth reflected perfectly.", reversed: "Distorted reflection. Clarity clouded. Integration incomplete. Unable to see truth clearly.", icon: "🪞" },
+      { num: 23, name: "The Jewel", meaning: "The Hōju, wish-granting jewel. Spiritual treasure earned through the journey. Manifestation of deepest desires. The prize.", reversed: "Wishes unfulfilled. Treasure lost or squandered. Not ready to receive the jewel. Manifestation blocked.", icon: "💎" },
+      { num: 24, name: "The Offering", meaning: "Reciprocity. Devotion. Exchange between realms. What you give to the shrine, to the spirits, to the journey. Gratitude made tangible.", reversed: "Broken reciprocity. Taking without giving. Offerings rejected or withheld. Gratitude forgotten.", icon: "🍚" },
+      { num: 25, name: "No One", meaning: "The void. Ego dissolution. Depression's 'I am nothing' meeting enlightenment's 'I am No One and therefore everyone.' Necessary emptiness before fullness.", reversed: "Trapped in ego. Unable to dissolve. Or: lost in void without the enlightenment. Emptiness without meaning.", icon: "⚫" },
+      { num: 26, name: "Misogi", meaning: "Purification. Ritual cleansing under the waterfall. Not judgment from outside but self-cleansing for rebirth. Releasing what no longer serves.", reversed: "Refusing purification. Clinging to what must be released. Unable to cleanse. Stagnation instead of renewal.", icon: "💧" },
+      { num: 27, name: "The Nine Tails", meaning: "Ultimate integration. Mastery. Wisdom embodied. The Kit has grown through every trial, earned every tail. Completion. Divinity realized.", reversed: "Integration incomplete. Tails not yet earned. Rushing to completion. False mastery or premature claiming of wisdom.", icon: "🦊" }
+    ];
+
+    const minorArcana = {
+      kitsune: {
+        name: "Kitsune",
+        element: "Fire/Wands",
+        cards: [
+          { name: "Ace of Kitsune", meaning: "Pure magical potential. The spark of transformation. One tail awakening. Raw creative fire, the beginning of your power recognizing itself. Intent forming.", reversed: "Blocked creativity. Magic turned inward and burning you. The spark that won't catch. Afraid to begin the transformation.", icon: "🦊🔥" },
+          { name: "Two of Kitsune", meaning: "Choice between paths. Two foxes, two ways forward. The tension of potential. Holding fire in both hands, deciding where to direct it. Vision forming.", reversed: "Paralysis. Can't choose. Or: forcing a choice before you're ready. Split energy achieving nothing.", icon: "🦊🦊" },
+          { name: "Three of Kitsune", meaning: "Momentum building. The spell is working. Looking ahead to what you're creating. Confidence in the magic you've set in motion. Expansion.", reversed: "Scattered energy. Too many fires burning. Or: waiting for results that need more action. Impatience killing the spell.", icon: "🦊🔥💨" },
+          { name: "Four of Kitsune", meaning: "Celebration of what's manifested. The shrine lit up. Stability in the fire—not burning out but burning right. Foundation of power established. Joy in creation.", reversed: "Taking abundance for granted. Restlessness in stability. Or: celebrating too early, letting the fire die while you party.", icon: "🏮🏮🏮🏮" },
+          { name: "Five of Kitsune", meaning: "Conflict, competition, many foxes with different agendas. Chaotic energy. The mess of transformation when everyone's changing at once. Creative friction.", reversed: "Avoiding necessary conflict. Or: conflict that's become destructive rather than creative. Too much chaos, no direction.", icon: "⚔️🦊⚔️" },
+          { name: "Six of Kitsune", meaning: "Victory, recognition. Your magic is seen. The fox returning triumphant. Public acknowledgment of your power. Leadership earned.", reversed: "False victory. Needing external validation. Or: victory that isolates you. Success that doesn't feel like success.", icon: "👑🦊" },
+          { name: "Seven of Kitsune", meaning: "Defending your ground. You've built something worth protecting. Standing your ground against challenge. Courage in the face of opposition.", reversed: "Paranoid defensiveness. Fighting battles that aren't real. Or: not defending what matters. Letting others take your fire.", icon: "🛡️🦊" },
+          { name: "Eight of Kitsune", meaning: "Swift movement. Energy in motion. Messages flying. Things happening fast. The acceleration before arrival. Momentum that can't be stopped.", reversed: "Rushing. Moving too fast to see clearly. Or: stagnation disguised as speed. Spinning wheels going nowhere.", icon: "⚡⚡⚡" },
+          { name: "Nine of Kitsune", meaning: "Resilience. Battle-worn but still standing. Last reserves of strength. The fox who's been through it and won't quit. Defensive strength.", reversed: "Exhaustion. Can't keep defending. Or: paranoia, seeing threats everywhere. Burned out from constant vigilance.", icon: "🔥💪" },
+          { name: "Ten of Kitsune", meaning: "Overwhelmed by responsibility. Carrying too much fire. All nine tails showing but the weight is crushing. Burden of mastery. 'This is what I wanted... right?'", reversed: "Releasing burdens. Learning to delegate. Or: complete collapse under the weight. Refusing responsibility entirely.", icon: "🎒⚡" },
+          { name: "Page of Kitsune", meaning: "Young fox energy. Playful exploration of power. Messages about magic. Enthusiastic beginner. The student discovering their gift. Innocent cunning.", reversed: "Immature use of power. Tricks without wisdom. Or: suppressing natural gifts. Afraid to be magical.", icon: "🦊✨" },
+          { name: "Knight of Kitsune", meaning: "Bold action. The adventuring fox. Passionate pursuit. Sometimes reckless but always moving. Fire in service of quest. Transformation in progress.", reversed: "Recklessness without wisdom. Impulsive destruction. Or: paralyzed by fear of action. The knight who won't ride.", icon: "🦊🔥⚔️" },
+          { name: "Queen of Kitsune", meaning: "Mastery of creative fire. Confident in power, generous with it. The fox who teaches others. Charismatic, magnetic, warm but sharp. Magic embodied gracefully.", reversed: "Manipulative charm. Power used for control. Or: dimming your light to make others comfortable. Queen who won't rule.", icon: "🦊👑🔥" },
+          { name: "King of Kitsune", meaning: "Command of transformation. The fox who's mastered all tails and leads others through the fire. Visionary action. Wisdom directing power perfectly.", reversed: "Tyrannical use of power. Or: refusing leadership when it's needed. The king who abandons the throne or abuses it.", icon: "🦊⛩️🔥" }
+        ]
+      },
+      kame: {
+        name: "Kame",
+        element: "Water/Cups",
+        cards: [
+          { name: "Ace of Kame", meaning: "First opening of the heart. Pure emotional potential. The turtle emerging from its shell. New love, new feelings, new capacity to feel. The spring within.", reversed: "Heart closed. Refusing to feel. Or: overwhelmed by first emotions. The turtle retreating before it's even begun.", icon: "🐢💧" },
+          { name: "Two of Kame", meaning: "Connection forming. Two turtles meeting. Partnership, mutual recognition. The slow building of trust. Emotional reciprocity. 'I see you, you see me.'", reversed: "Disconnect. One-sided connection. Or: fear of intimacy blocking the bond. Two shells, no meeting.", icon: "🐢🐢" },
+          { name: "Three of Kame", meaning: "Celebration of emotional abundance. Community of feeling. Friends, family, emotional richness. The pond full of turtles, all safe together. Joy shared.", reversed: "Superficial connections. Using community to avoid depth. Or: isolation while surrounded. Empty celebration.", icon: "🐢🐢🐢" },
+          { name: "Four of Kame", meaning: "Emotional withdrawal. Contemplation. The turtle fully in its shell. Not depression but necessary retreat. Taking time to process. Meditation on feelings.", reversed: "Stuck in withdrawal. Using protection as prison. Or: refusing needed solitude. Can't be alone with your waters.", icon: "🐢🏠" },
+          { name: "Five of Kame", meaning: "Grief, loss, disappointment. Three shells remain, two are gone. What was lost in the waters. Mourning what cannot return. The weight of sadness.", reversed: "Refusing to grieve. Clinging to what's gone. Or: drowning in grief, can't see what remains. All loss, no healing.", icon: "💔🐢💔" },
+          { name: "Six of Kame", meaning: "Nostalgia, memory, past emotional safety. The turtle returning to old waters. Childhood feelings. What once nourished you. Sweet memory or longing.", reversed: "Living in the past. Can't move forward. Or: romanticizing what was actually harmful. False nostalgia.", icon: "🐢🌸" },
+          { name: "Seven of Kame", meaning: "Emotional overwhelm. Too many feelings, too many choices. The turtle surrounded by options, paralyzed. Dreams and delusions mixing with truth. Confusion.", reversed: "Clarity cutting through. Or: complete avoidance of all feeling. Shutting down to escape overwhelm.", icon: "🐢💭💭💭" },
+          { name: "Eight of Kame", meaning: "Walking away from emotional entanglement. Leaving the old waters. The turtle's slow but deliberate departure. Not running, but choosing to leave. Conscious release.", reversed: "Abandoning what still matters. Or: unable to leave toxic waters. The turtle who can't walk away.", icon: "🐢🚶" },
+          { name: "Nine of Kame", meaning: "Emotional fulfillment. The wish granted. Deep satisfaction. The turtle in perfect waters. Contentment earned through patience. Heart's desire manifest.", reversed: "Shallow satisfaction. Getting what you wanted but it's not enough. Or: can't enjoy what you have. Gratitude blocked.", icon: "🐢✨💙" },
+          { name: "Ten of Kame", meaning: "Complete emotional fulfillment. The whole pond thriving. Family, love, legacy. The turtle who lived long enough to see it all come together. Ancient joy. Wisdom of the heart.", reversed: "Emotional stagnation in 'perfect' life. Or: family toxicity disguised as love. The pond that's actually a prison.", icon: "🐢🏡💕" },
+          { name: "Page of Kame", meaning: "Young emotional openness. The small turtle learning to feel. Messages about love. Gentle curiosity. Beginning to trust the waters. Innocent vulnerability.", reversed: "Naïve emotionally. Hurt easily. Or: shutting down sensitivity. The page who won't feel.", icon: "🐢🌱" },
+          { name: "Knight of Kame", meaning: "Pursuing emotional depth. The romantic turtle. Seeking connection, offering heart. Sometimes idealistic but sincere. Emotional courage in motion.", reversed: "Emotional manipulation disguised as romance. Or: fear of real intimacy. The knight who won't commit.", icon: "🐢💕⚔️" },
+          { name: "Queen of Kame", meaning: "Emotional wisdom embodied. Deep empathy, nurturing power. The turtle who's lived centuries and understands all waters. Compassionate, intuitive, safe harbor.", reversed: "Emotional manipulation. Smothering care. Or: empathy so deep it drowns you. The queen who won't set boundaries.", icon: "🐢👑💙" },
+          { name: "King of Kame", meaning: "Mastery of emotional waters. Calm depth. The ancient turtle who's felt everything and achieved peace. Wise counsel. Emotional stability. The still, deep pond.", reversed: "Emotional coldness disguised as wisdom. Or: suppressing all feeling as 'enlightenment'. The king who's forgotten how to feel.", icon: "🐢⛩️💧" }
+        ]
+      },
+      tengu: {
+        name: "Tengu",
+        element: "Air/Swords",
+        cards: generateMinorSuit("Tengu", "👺", "Intellect, martial skill, pride, communication")
+      },
+      tanuki: {
+        name: "Tanuki",
+        element: "Earth/Pentacles",
+        cards: generateMinorSuit("Tanuki", "🦝", "Material wealth, transformation, earthly pleasures, prosperity")
+      }
+    };
+
+    function generateMinorSuit(name, icon, theme) {
+      const cards = [];
+      const numbers = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+      const court = ["Page", "Knight", "Queen", "King"];
+      
+      numbers.forEach((num, i) => {
+        cards.push({
+          name: `${num} of ${name}`,
+          meaning: `${theme}. The energy of ${num.toLowerCase()} manifesting through ${name} qualities.`,
+          icon: icon
+        });
+      });
+      
+      court.forEach(rank => {
+        cards.push({
+          name: `${rank} of ${name}`,
+          meaning: `${theme}. The ${rank.toLowerCase()} embodies ${name} wisdom and power.`,
+          icon: icon
+        });
+      });
+      
+      return cards;
+    }
+
+    let currentDecks = ['major'];
+    let drawnCards = [];
+    let currentSpreadType = null;
+
+    const spreadLayouts = {
+      one: {
+        positions: ['Advice']
+      },
+      three: {
+        positions: ['Root', 'Present', 'Guidance & Help']
+      },
+      nine: {
+        positions: [
+          'Root', 'Past Anchor', 'Past Heart', 'Past Pattern',
+          'Current Situation', 'Current Heart', 'The Thread You Weave',
+          'Future Fear', 'Future Challenge', 'Outcome'
+        ]
+      }
+    };
+
+    function getSelectedDecks() {
+      const selected = [];
+      document.querySelectorAll('.deck-check:checked').forEach(checkbox => {
+        selected.push(checkbox.dataset.deck);
+      });
+      return selected;
+    }
+
+    function getCombinedDeck() {
+      const selected = getSelectedDecks();
+      if (selected.length === 0) return majorArcana;
+      
+      let combined = [];
+      selected.forEach(deckName => {
+        if (deckName === 'major') {
+          combined = combined.concat(majorArcana);
+        } else {
+          combined = combined.concat(minorArcana[deckName].cards);
+        }
+      });
+      return combined;
+    }
+
+    function getCurrentDeck() {
+      return getCombinedDeck();
+    }
+
+    function shuffleArray(arr) {
+      const shuffled = [...arr];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    function drawCards(count, spreadType) {
+      const deck = getCurrentDeck();
+      const shuffled = shuffleArray(deck);
+      const allowReversed = document.getElementById('allowReversed').checked;
+      
+      currentSpreadType = spreadType;
+      drawnCards = shuffled.slice(0, count).map(card => ({
+        ...card,
+        isReversed: allowReversed && Math.random() < 0.5
+      }));
+      
+      renderSpread();
+    }
+
+    function renderSpread() {
+      const spread = document.getElementById('spread');
+      spread.innerHTML = '';
+      
+      if (!currentSpreadType) return;
+      
+      const layout = spreadLayouts[currentSpreadType];
+      const positions = layout.positions;
+      
+      if (currentSpreadType === 'nine') {
+        // Render 9-card spread in three rows
+        const rows = [
+          { label: 'Past', cards: drawnCards.slice(0, 4) },
+          { label: 'Present', cards: drawnCards.slice(4, 7) },
+          { label: 'Future', cards: drawnCards.slice(7, 10) }
+        ];
+        
+        rows.forEach((row, rowIndex) => {
+          const rowLabel = document.createElement('div');
+          rowLabel.className = 'spread-label';
+          rowLabel.textContent = row.label;
+          spread.appendChild(rowLabel);
+          
+          const rowContainer = document.createElement('div');
+          rowContainer.className = 'spread-row';
+          
+          row.cards.forEach((card, cardIndex) => {
+            const globalIndex = rowIndex * (rowIndex === 0 ? 4 : 3) + cardIndex;
+            const positionDiv = createCardElement(card, positions[globalIndex]);
+            rowContainer.appendChild(positionDiv);
+          });
+          
+          spread.appendChild(rowContainer);
+        });
+        
+        // Add reversed path interpretation
+        const pathLabel = document.createElement('div');
+        pathLabel.className = 'spread-label';
+        pathLabel.style.marginTop = '40px';
+        pathLabel.style.color = '#ff69b4';
+        pathLabel.textContent = '⟲ Three Ways to Read the Nine Tails';
+        spread.appendChild(pathLabel);
+        
+        const pathText = document.createElement('div');
+        pathText.style.color = '#87ceeb';
+        pathText.style.textAlign = 'left';
+        pathText.style.maxWidth = '700px';
+        pathText.style.margin = '20px auto';
+        pathText.style.lineHeight = '1.8';
+        pathText.innerHTML = `
+          <p style="margin-bottom: 15px;"><strong style="color: #ff69b4;">1. Forward (Past → Present → Future):</strong> The path you think you're walking. Where anxiety lives. The story you tell yourself about what's coming.</p>
+          
+          <p style="margin-bottom: 15px;"><strong style="color: #ff69b4;">2. Backward (Future → Past):</strong> ⟲ <em>The path you're already on.</em> Read these 9 cards in reverse to see the truth: you were always walking toward this. Every step was right, even when it hurt. This is faith made visible. You are already becoming.</p>
+          
+          <p style="margin-bottom: 20px;"><strong style="color: #ff69b4;">3. The Whole Web (Center as anchor):</strong> ✨ Look at all nine cards as a constellation, not a sequence. The <strong>Current Heart</strong> (center card) is your mirror. The other 8 cards form the 8-pointed star around it—<em>Venus, The Morning Star, The Divine Mother.</em></p>
+          
+          <p style="margin-left: 20px; margin-bottom: 10px; font-style: italic;">This is your <strong>shadow</strong> made visible:</p>
+          <p style="margin-left: 40px; margin-bottom: 5px;">• The Web showing you the threads</p>
+          <p style="margin-left: 40px; margin-bottom: 5px;">• The pattern you've woven without knowing</p>
+          <p style="margin-left: 40px; margin-bottom: 5px;">• What you cannot see about yourself, reflected back</p>
+          
+          <p style="margin-top: 20px; font-style: italic; color: #ff69b4;">The Black Mirror, the Sacred Mirror, and the Loom—all at once. 🦊⛩️</p>
+        `;
+        spread.appendChild(pathText);
+      } else {
+        // Render 1 or 3 card spreads in a single row
+        const rowContainer = document.createElement('div');
+        rowContainer.className = 'spread-row';
+        
+        drawnCards.forEach((card, index) => {
+          const positionDiv = createCardElement(card, positions[index]);
+          rowContainer.appendChild(positionDiv);
+        });
+        
+        spread.appendChild(rowContainer);
+      }
+    }
+
+    function createCardElement(card, positionLabel) {
+      const positionDiv = document.createElement('div');
+      positionDiv.className = 'card-position';
+      
+      const label = document.createElement('div');
+      label.className = 'position-label';
+      label.textContent = positionLabel;
+      positionDiv.appendChild(label);
+      
+      const cardEl = document.createElement('div');
+      cardEl.className = 'card';
+      if (card.isReversed) {
+        cardEl.classList.add('reversed');
+      }
+      
+      const displayMeaning = card.isReversed && card.reversed 
+        ? card.reversed 
+        : card.meaning;
+      
+      const isMinor = !('num' in card);
+      
+      cardEl.innerHTML = `
+        <div class="card-back">
+          <div class="card-icon">🦊</div>
+        </div>
+        <div class="card-front">
+          ${!isMinor ? `<div class="card-number">${card.num}</div>` : ''}
+          <div class="card-title">${card.name}</div>
+          ${card.isReversed ? '<div class="reversed-indicator">⟲ Reversed</div>' : ''}
+          <div class="card-icon">${card.icon}</div>
+          <div class="card-meaning">${displayMeaning.substring(0, 80)}...</div>
+        </div>
+      `;
+      
+      cardEl.addEventListener('click', () => {
+        if (!cardEl.classList.contains('flipped')) {
+          cardEl.classList.add('flipped');
+        } else {
+          showModal(card);
+        }
+      });
+      
+      positionDiv.appendChild(cardEl);
+      return positionDiv;
+    }
+
+    function showModal(card) {
+      const modal = document.getElementById('modal');
+      const displayMeaning = card.isReversed && card.reversed 
+        ? card.reversed 
+        : card.meaning;
+      
+      const isMinor = !('num' in card);
+      const suitText = isMinor 
+        ? (card.name.includes('Kitsune') ? 'Kitsune (Fire/Wands)' :
+           card.name.includes('Kame') ? 'Kame (Water/Cups)' :
+           card.name.includes('Tengu') ? 'Tengu (Air/Swords)' :
+           'Tanuki (Earth/Pentacles)')
+        : 'Major Arcana';
+      
+      document.getElementById('modalTitle').textContent = card.name + (card.isReversed ? ' (Reversed)' : '');
+      document.getElementById('modalSuit').textContent = suitText;
+      document.getElementById('modalMeaning').innerHTML = `
+        <strong>${card.isReversed ? 'Reversed: ' : 'Upright: '}</strong>${displayMeaning}
+        ${card.isReversed && card.reversed ? `<br><br><strong>Upright: </strong>${card.meaning}` : ''}
+      `;
+      modal.classList.add('active');
+    }
+
+    document.getElementById('drawOne').addEventListener('click', () => drawCards(1, 'one'));
+    document.getElementById('drawThree').addEventListener('click', () => drawCards(3, 'three'));
+    document.getElementById('drawNine').addEventListener('click', () => drawCards(9, 'nine'));
+    document.getElementById('clearSpread').addEventListener('click', () => {
+      drawnCards = [];
+      currentSpreadType = null;
+      document.getElementById('spread').innerHTML = '';
+    });
+
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('modal').classList.remove('active');
+    });
+
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') {
+        document.getElementById('modal').classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>
